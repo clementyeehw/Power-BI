@@ -1,0 +1,19 @@
+1. GET USERPRINCIPALNAME
+========================
+CurrentUserPrincipalName = USERPRINCIPALNAME()
+
+2. GET USERNAME
+===============
+CurrentUserName = USERNAME()
+
+3. ROLE LEVEL SECURITY FOR SALESPERSON
+======================================
+[EmailAddress] = userprincipalname()
+
+4. ROLE LEVEL SECURITY FOR COUNTRY MANAGER - UK
+===============================================
+[SalesTerritoryKey] = 1
+
+5. ROLE LEVEL SECURITY FOR VP SALES - EUROPE
+===============================================
+[SalesTerritoryKey] IN {1,2,3,4,5,6}

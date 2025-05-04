@@ -1,0 +1,714 @@
+// CMA
+cma_covariance = 
+    
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR vol_row = CALCULATE( [cma_volatility], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR vol_column = CALCULATE( [cma_volatility], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+    VAR correl = CALCULATE( 
+        SUM('D - CMA Correlation'[Correl_Value]), 
+        'D - CMA Correlation'[Row] = R1 && 'D - CMA Correlation'[Column] = C1 
+    )
+
+RETURN
+vol_row * vol_column * correl
+
+cma_inflation = CALCULATE( 
+    SUM('D - CMA Asset Class'[Return]), 
+    FILTER( ALL('D - CMA Asset Class'), 'D - CMA Asset Class'[cmaAssetClassId] = 11281122 ) 
+)
+
+cma_mean_lognorm_ret = 
+    
+    VAR ac_lognorm_ret = LN(1 + SUM( 'D - CMA Asset Class'[Return] ))
+    VAR ac_lognorm_var = LN( SQRT( POWER( [cma_volatility], 2 ) / EXP( ac_lognorm_ret * 2 ) + 0.25 ) + 0.5 )
+
+RETURN
+EXP(ac_lognorm_ret + ac_lognorm_var / 2) - 1
+
+cma_risk_free = CALCULATE( 
+    SUM('D - CMA Asset Class'[Return]), 
+    FILTER( ALL('D - CMA Asset Class'), 'D - CMA Asset Class'[cmaAssetClassId] = 11461122 )
+) - 'D - Aon Fees'[D - Aon Fees Value]
+
+cma_risk_profile_flag = HASONEFILTER('D - US CMA Risk Profile'[cmaRiskProfile])
+
+cma_volatility = IF(
+    MAX('D - CMA Asset Class'[cmaAssetClassId]) = 12061999,
+    'D - Aon Noise Factor'[D - Aon Noise Factor Value],
+    SUM('D - CMA Asset Class'[Risk])
+)
+
+// Client Portfolio
+port_log_norm_vol_matrix_client = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_client], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_client], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+wt_row * wt_column * [cma_covariance]
+
+port_log_norm_vol_value_client = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_client]
+        )
+
+RETURN
+SQRT(vol)
+
+port_mean_log_norm_ret_value_client = IF(
+    [cma_risk_profile_flag],
+    SUMX('D - CMA Asset Class', [port_weights_client] * [cma_mean_lognorm_ret]),
+    SUMX(VALUES('D - CMA Asset Class'[cmaAssetClassId]), [port_weights_client] * [cma_mean_lognorm_ret])
+)
+
+port_median_log_norm_real_ret_value_client = 
+    
+    VAR inflation = CALCULATE( [cma_inflation], ALL('D - CMA Asset Class'[CMA Asset Class]) ) // Removes any filter context
+     
+RETURN
+( ( 1 + [port_median_log_norm_ret_value_client] ) / ( 1 + inflation ) ) - 1
+
+port_median_log_norm_ret_value_client = EXP([port_median_norm_ret_value_client]) - 1 - 'D - Aon Fees'[D - Aon Fees Value]
+
+port_median_norm_ret_value_client = LN( 1 + [port_mean_log_norm_ret_value_client] ) - 0.5 * [port_norm_vol_value_client]
+
+port_norm_vol_value_client = LN(
+        1 + ( POWER([port_log_norm_vol_value_client], 2) / POWER( 1 + [port_mean_log_norm_ret_value_client], 2 ) )
+    )
+	
+port_sharpe_value_client = ( [port_median_log_norm_ret_value_client] - [cma_risk_free] )  / [port_log_norm_vol_value_client]
+
+port_var_95_1y_value_client = EXP( [port_median_norm_ret_value_client] + NORM.S.INV(0.05) * SQRT( [port_norm_vol_value_client] ) ) - 1 - 'D - Aon Fees'[D - Aon Fees Value]
+
+port_weights_client = 
+
+    VAR asset_id = SELECTEDVALUE('D - CMA Asset Class'[cmaAssetClassId])
+    // Please hardcode new cmaAssetClassId
+    VAR cma_assets = SWITCH(
+        asset_id,
+        10211011, 'D - Weights - Public Eq US Large Cap - Client'[D - Weights - Public Eq US Large Cap - Client Value],
+        10221011, 'D - Weights - Public Eq US Small Cap - Client'[D - Weights - Public Eq US Small Cap - Client Value],
+        10001011, 'D - Weights - Public Eq Global - Client'[D - Weights - Public Eq Global - Client Value],
+        10071011, 'D - Weights - Public Eq International - Client'[D - Weights - Public Eq International - Client Value],
+        10131011, 'D - Weights - Public Eq Emerging Market - Client'[D - Weights - Public Eq Emerging Market - Client Value],
+        11461122, 'D - Weights - RRFI Gov Cash - Client'[D - Weights - RRFI Gov Cash - Client Value],
+        11471122, 'D - Weights - RRFI LIBOR Cash - Client'[D - Weights - RRFI LIBOR Cash - Client Value],
+        11481122, 'D - Weights - RRFI US TIPS - Client'[D - Weights - RRFI US TIPS - Client Value],
+        11491122, 'D - Weights - RRFI US Core - Client'[D - Weights - RRFI US Core - Client Value],
+        11501122, 'D - Weights - RRFI US Long Gov/Credit - Client'[D - Weights - RRFI US Long Gov/Credit - Client Value],
+        11511122, 'D - Weights - RRFI US Long Credit - Client'[D - Weights - RRFI US Long Credit - Client Value],
+        11521122, 'D - Weights - RRFI US Long Gov - Client'[D - Weights - RRFI US Long Gov - Client Value],
+        10501041, 'D - Weights - Liquid RSFI US High Yield - Client'[D - Weights - Liquid RSFI US High Yield - Client Value],
+        10521041, 'D - Weights - Liquid RSFI US Bank Loans - Client'[D - Weights - Liquid RSFI US Bank Loans - Client Value],
+        11531122, 'D - Weights - RRFI Non-US Dev (0% Hedged) - Client'[D - Weights - RRFI Non-US Dev (0% Hedged) - Client Value],
+        11541122, 'D - Weights - RRFI Non-US Dev (50% Hedged) - Client'[D - Weights - RRFI Non-US Dev (50% Hedged) - Client Value],
+        11551122, 'D - Weights - RRFI Non-US Dev (100% Hedged) - Client'[D - Weights - RRFI Non-US Dev (100% Hedged) - Client Value],
+        11241122, 'D - Weights - RRFI US Short Gov - Client'[D - Weights - RRFI US Short Gov - Client Value],
+        11251122, 'D - Weights - RRFI US Short Credit - Client'[D - Weights - RRFI US Short Credit - Client Value],
+        11261122, 'D - Weights - RRFI US Interm Gov - Client'[D - Weights - RRFI US Interm Gov - Client Value],
+        11271122, 'D - Weights - RRFI US Interm Credit - Client'[D - Weights - RRFI US Interm Credit - Client Value],
+        11831122, 'D - Weights - RRFI US Market Duration Gov - Client'[D - Weights - RRFI US Market Duration Gov - Client Value],
+        11851122, 'D - Weights - RRFI US Core Plus - Client'[D - Weights - RRFI US Core Plus - Client Value],
+        10601041, 'D - Weights - Liquid RSFI US Convertible - Client'[D - Weights - Liquid RSFI US Convertible - Client Value],
+        11801122, 'D - Weights - RRFI US STRIPS - Client'[D - Weights - RRFI US STRIPS - Client Value],
+        10531041, 'D - Weights - Liquid RSFI Emerging Market (Sov USD) - Client'[D - Weights - Liquid RSFI Emerging Market (Sov USD) - Client Value],
+        10541041, 'D - Weights - Liquid RSFI Emerging Market (Corp USD) - Client'[D - Weights - Liquid RSFI Emerging Market (Corp USD) - Client Value],
+        10551041, 'D - Weights - Liquid RSFI Emerging Market (Sov Local) - Client'[D - Weights - Liquid RSFI Emerging Market (Sov Local) - Client Value],
+        10981101, 'D - Weights - Liquid Alt Global HF Broad (Universe) - Client'[D - Weights - Liquid Alt Global HF Broad (Universe) - Client Value],
+        11161101, 'D - Weights - Liquid Alt Global HF Broad (Institutional Quality) - Client'[D - Weights - Liquid Alt Global HF Broad (Institutional Quality) - Client Value],
+        11841122, 'D - Weights - RRFI eLDI - Client'[D - Weights - RRFI eLDI - Client Value],
+        10761071, 'D - Weights - Open-End RA US Core Real Estate - Client'[D - Weights - Open-End RA US Core Real Estate - Client Value],
+        10911081, 'D - Weights - Closed-End RA US Non-Core Real Estate - Client'[D - Weights - Closed-End RA US Non-Core Real Estate - Client Value],
+        10401011, 'D - Weights - Public Eq US REIT - Client'[D - Weights - Public Eq US REIT - Client Value],
+        10851081, 'D - Weights - Open-End RA US Infra - Client'[D - Weights - Open-End RA US Infra - Client Value],
+        10851091, 'D - Weights - Closed-End RA US Infra - Client'[D - Weights - Closed-End RA US Infra - Client Value],
+        10921081, 'D - Weights - Open-End RA US Model Portfolio - Client'[D - Weights - Open-End RA US Model Portfolio - Client Value],
+        10921091, 'D - Weights - Closed-End RA US Model Portfolio - Client'[D - Weights - Closed-End RA US Model Portfolio - Client Value],
+        10441031, 'D - Weights - Private Eq Global FoF - Client'[D - Weights - Private Eq Global FoF - Client Value],
+        10841071, 'D - Weights - Open-End RA Global Commodities - Client'[D - Weights - Open-End RA Global Commodities - Client Value],
+        12101101, 'D - Weights - Liquid Alt Global HF Low Beta (Universe) - Client'[D - Weights - Liquid Alt Global HF Low Beta (Universe) - Client Value],
+        12121101, 'D - Weights - Liquid Alt Global HF High Beta (Universe) - Client'[D - Weights - Liquid Alt Global HF High Beta (Universe) - Client Value],
+        12111101, 'D - Weights - Liquid Alt Global HF Low Beta (Institutional Quality) - Client'[D - Weights - Liquid Alt Global HF Low Beta (Institutional Quality) - Client Value],
+        12131101, 'D - Weights - Liquid Alt Global HF High Beta (Institutional Quality) - Client'[D - Weights - Liquid Alt Global HF High Beta (Institutional Quality) - Client Value],
+        11021101, 'D - Weights - Liquid Alt Global HF Long/Short Eq (Universe) - Client'[D - Weights - Liquid Alt Global HF Long/Short Eq (Universe) - Client Value],
+        11101101, 'D - Weights - Liquid Alt Global HF Long/Short Eq (Institutional Quality) - Client'[D - Weights - Liquid Alt Global HF Long/Short Eq (Institutional Quality) - Client Value],
+        11001101, 'D - Weights - Liquid Alt Global HF CTA (Universe) - Client'[D - Weights - Liquid Alt Global HF CTA (Universe) - Client Value],
+        11071101, 'D - Weights - Liquid Alt Global HF CTA (Institutional Quality) - Client'[D - Weights - Liquid Alt Global HF CTA (Institutional Quality) - Client Value],
+        10701061, 'D - Weights - Illiquid RSFI US PD Direct Lending - Client'[D - Weights - Illiquid RSFI US PD Direct Lending - Client Value],
+        10711061, 'D - Weights - Illiquid RSFI US PD Commercial Mortgages - Client'[D - Weights - Illiquid RSFI US PD Commercial Mortgages - Client Value],
+        10901081, 'D - Weights - Closed-End RA Timberland - Client'[D - Weights - Closed-End RA Timberland - Client Value],
+        10891081, 'D - Weights - Closed-End RA Farmland - Client'[D - Weights - Closed-End RA Farmland - Client Value],
+        10571041, 'D - Weights - Liquid RSFI Institutional Quality - Client'[D - Weights - Liquid RSFI Institutional Quality - Client Value],
+        10571051, 'D - Weights - Liquid RSFI Universe - Client'[D - Weights - Liquid RSFI Universe - Client Value],
+        10431011, 'D - Weights - Liquid Alt EIRP High Beta - Client'[D - Weights - Liquid Alt EIRP High Beta - Client Value],
+        10591041, 'D - Weights - Liquid RSFI ILS - Client'[D - Weights - Liquid RSFI ILS - Client Value],
+        11141101, 'D - Weights - Liquid Alt Risk Parity - Client'[D - Weights - Liquid Alt Risk Parity - Client Value],
+        12081011, 'D - Weights - Public Eq 85 Global/15 US Blend - Client'[D - Weights - Public Eq 85 Global/15 US Blend - Client Value],
+        11821122, 'D - Weights - RRFI US Market Duration Credit - Client'[D - Weights - RRFI US Market Duration Credit - Client Value],
+        10281011, 'D - Weights - Public Eq US All Cap - Client'[D - Weights - Public Eq US All Cap - Client Value],
+        10561041, 'D - Weights - Liquid RSFI Broad Emerging Market - Client'[D - Weights - Liquid RSFI Broad Emerging Market - Client Value],
+        10831081, 'D - Weights - Closed-End RA US Broad Real Estate - Client'[D - Weights - Closed-End RA US Broad Real Estate - Client Value],
+        0
+    )
+    VAR client_weights_table = ADDCOLUMNS('D - CMA Asset Class', "@asset_weights", cma_assets)
+    VAR rebased_weights = IF( [cma_risk_profile_flag], 
+        SUMX( client_weights_table, ([@asset_weights] / [sum_weights_total_client]) ), 
+        SUMX( client_weights_table, ([@asset_weights] / 100) )
+    )
+
+RETURN
+rebased_weights
+
+sum_weights_total_client = 
+
+    VAR port_lens_id = SELECTEDVALUE('D - US CMA Risk Profile'[cmaRiskId])
+    VAR total_weights = 
+        IF(port_lens_id = 1,
+            [sum_weights_public_eq_client] + [sum_weights_private_eq_client] + [sum_weights_liquid_rsfi_client] + [sum_weights_illiquid_rsfi_client] + [sum_weights_open_end_ra_client] + [sum_weights_closed_end_ra_client] + [sum_weights_liquid_alt_client],
+            IF(port_lens_id = 2, [sum_weights_rrfi_client],
+                [sum_weights_public_eq_client] + [sum_weights_private_eq_client] + [sum_weights_liquid_rsfi_client] + [sum_weights_illiquid_rsfi_client] + [sum_weights_open_end_ra_client] + [sum_weights_closed_end_ra_client] + [sum_weights_liquid_alt_client] + [sum_weights_rrfi_client]
+            )
+        )
+
+RETURN
+total_weights
+
+// Liability Proxy
+port_log_norm_vol_matrix_lp = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_lp], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_lp], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+wt_row * wt_column * [cma_covariance]
+
+port_log_norm_vol_value_lp = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_lp]
+        )
+
+RETURN
+IF( [cma_risk_profile_flag], 0, SQRT(vol) )
+
+port_mean_log_norm_ret_value_lp = SUMX( 'D - CMA Asset Class', [port_weights_lp] * [cma_mean_lognorm_ret] )
+
+port_median_log_norm_real_ret_value_lp = 
+    
+    VAR inflation = CALCULATE( [cma_inflation], ALL('D - CMA Asset Class'[CMA Asset Class]) ) // Removes any filter context
+     
+RETURN
+IF( [cma_risk_profile_flag], 0, ( ( 1 + [port_median_log_norm_ret_value_lp] ) / ( 1 + inflation ) ) - 1 )
+
+port_median_log_norm_ret_value_lp = IF( [cma_risk_profile_flag], 0, EXP([port_median_norm_ret_value_lp]) - 1 )
+
+port_median_norm_ret_value_lp = LN( 1 + [port_mean_log_norm_ret_value_lp] ) - 0.5 * [port_norm_vol_value_lp]
+
+port_norm_vol_value_lp = LN(
+        1 + ( POWER([port_log_norm_vol_value_lp], 2) / POWER( 1 + [port_mean_log_norm_ret_value_lp], 2 ) )
+    )
+	
+port_sharpe_value_lp = ( [port_median_log_norm_ret_value_lp] - [cma_risk_free] )  / [port_log_norm_vol_value_lp]
+
+port_var_95_1y_value_lp = IF( [cma_risk_profile_flag], 0, EXP( [port_median_norm_ret_value_lp] + NORM.S.INV(0.05) * SQRT( [port_norm_vol_value_lp] ) ) - 1 - 'D - Aon Fees'[D - Aon Fees Value] )
+
+port_weights_lp = 
+
+    VAR asset_id = SELECTEDVALUE('D - CMA Asset Class'[cmaAssetClassId])
+    VAR mp_id = SELECTEDVALUE('D - Model Portfolio'[modelPortfolioTypeId])
+    VAR cma_assets =    
+        IF( mp_id = 1,
+            SWITCH(
+                asset_id,
+                11511122, [weights_long_credit_cp_lp],
+                11801122, [weights_strips_cp_lp],
+                12061999, [weights_noise],
+                0
+            ),
+            IF( mp_id = 2,
+                SWITCH(
+                    asset_id,
+                    11851122, [weights_core_plus_pp_lp],
+                    12061999, [weights_noise],
+                    0
+                ),
+                SWITCH(
+                    asset_id,
+                    12061999, [weights_noise],
+                    0
+                )
+            )
+        )
+
+RETURN
+cma_assets
+
+weights_core_plus_pp_lp = 1
+weights_long_credit_cp_lp = 0.75
+weights_noise = 1
+weights_strips_cp_lp = 0.25
+
+// Model Portfolio
+port_log_norm_vol_matrix_model = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_model], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_model], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+IFERROR(wt_row * wt_column * [cma_covariance], 0)
+
+port_log_norm_vol_value_model = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_model]
+        )
+
+RETURN
+SQRT(vol)
+
+port_mean_log_norm_ret_value_model = IF(
+    [cma_risk_profile_flag],
+    SUMX('D - CMA Asset Class', [port_weights_model] * [cma_mean_lognorm_ret]),
+    SUMX( VALUES('D - CMA Asset Class'[cmaAssetClassId]), [port_weights_model] * [cma_mean_lognorm_ret] )
+)
+
+port_median_log_norm_real_ret_value_model = 
+    
+    VAR inflation = CALCULATE( [cma_inflation], ALL('D - CMA Asset Class'[CMA Asset Class]) ) // Removes any filter context
+     
+RETURN
+( ( 1 + [port_median_log_norm_ret_value_model] ) / ( 1 + inflation ) ) - 1
+
+port_median_log_norm_ret_value_model = EXP([port_median_norm_ret_value_model]) - 1 - 'D - Aon Fees'[D - Aon Fees Value]
+
+port_median_norm_ret_value_model = LN( 1 + [port_mean_log_norm_ret_value_model] ) - 0.5 * [port_norm_vol_value_model]
+
+port_norm_vol_value_model = LN(
+        1 + ( POWER([port_log_norm_vol_value_model], 2) / POWER( 1 + [port_mean_log_norm_ret_value_model], 2 ) )
+    )
+
+port_sharpe_value_model = ( [port_median_log_norm_ret_value_model] - [cma_risk_free] )  / [port_log_norm_vol_value_model]
+
+port_var_95_1y_value_model = EXP( [port_median_norm_ret_value_model] + NORM.S.INV(0.05) * SQRT( [port_norm_vol_value_model] ) ) - 1 - 'D - Aon Fees'[D - Aon Fees Value]
+
+port_weights_model = 
+
+    VAR asset_id = SELECTEDVALUE('D - CMA Asset Class'[cmaAssetClassId])
+    VAR model_weights = SUM('F - Model Portfolio - Raw Allocation'[Model Portfolio CMA Allocation])
+    VAR total_weights = CALCULATE(
+        SUM('F - Model Portfolio - Raw Allocation'[Model Portfolio CMA Allocation]),
+        ALLEXCEPT('F - Model Portfolio - Raw Allocation', 'D - Model Portfolio'[modelPortfolioDisplayName], 'D - US CMA Risk Profile'[cmaRiskProfile])
+    )
+    // Please hardcode new cmaAssetClassId
+    VAR cma_assets = SWITCH(
+        asset_id,
+        10211011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10211011),
+        10221011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10221011),
+        10001011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10001011),
+        10071011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10071011),
+        10131011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10131011),
+        11461122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11461122),
+        11471122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11471122),
+        11481122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11481122),
+        11491122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11491122),
+        11501122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11501122),
+        11511122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11511122),
+        11521122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11521122),
+        10501041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10501041),
+        10521041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10521041),
+        11531122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11531122),
+        11541122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11541122),
+        11551122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11551122),
+        11241122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11241122),
+        11251122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11251122),
+        11261122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11261122),
+        11271122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11271122),
+        11831122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11831122),
+        11851122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11851122),
+        10601041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10601041),
+        11801122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11801122),
+        10531041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10531041),
+        10541041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10541041),
+        10551041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10551041),
+        10981101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10981101),
+        11161101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11161101),
+        11841122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11841122),
+        10761071, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10761071),
+        10911081, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10911081),
+        10401011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10401011),
+        10851081, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10851081),
+        10851091, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10851091),
+        10921081, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10921081),
+        10921091, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10921091),
+        10441031, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10441031),
+        10841071, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10841071),
+        12101101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12101101),
+        12121101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12121101),
+        12111101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12111101),
+        12131101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12131101),
+        11021101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11021101),
+        11101101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11101101),
+        11001101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11001101),
+        11071101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11071101),
+        10701061, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10701061),
+        10711061, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10711061),
+        10901081, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10901081),
+        10891081, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10891081),
+        10571041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10571041),
+        10571051, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10571051),
+        10431011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10431011),
+        10591041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10591041),
+        11141101, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11141101),
+        12081011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12081011),
+        11821122, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11821122),
+        10281011, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10281011),
+        10561041, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10561041),
+        10831081, CALCULATE(model_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10831081),
+        0
+    )
+    VAR model_weights_table = ADDCOLUMNS('D - CMA Asset Class', "@asset_weights", cma_assets)
+    VAR rebased_weights = IF( [cma_risk_profile_flag], 
+        IFERROR( SUMX( model_weights_table, ([@asset_weights] / total_weights) ), 0 ),
+        SUMX( model_weights_table, [@asset_weights] )
+    )
+
+RETURN
+rebased_weights
+
+// Blend
+port_log_norm_vol_matrix_target = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_target], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_target], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+IFERROR(wt_row * wt_column * [cma_covariance], 0)
+
+port_log_norm_vol_value_target = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_target]
+        )
+
+RETURN
+SQRT(vol)
+
+port_mean_log_norm_ret_value_target = IF(
+    [cma_risk_profile_flag],
+    SUMX('D - CMA Asset Class', [port_weights_target] * [cma_mean_lognorm_ret]),
+    SUMX( VALUES('D - CMA Asset Class'[cmaAssetClassId]), [port_weights_target] * [cma_mean_lognorm_ret] )
+)
+
+port_median_log_norm_real_ret_value_target = 
+    
+    VAR inflation = CALCULATE( [cma_inflation], ALL('D - CMA Asset Class'[CMA Asset Class]) ) // Removes any filter context
+     
+RETURN
+( ( 1 + [port_median_log_norm_ret_value_target] ) / ( 1 + inflation ) ) - 1
+
+port_median_log_norm_ret_value_target = EXP([port_median_norm_ret_value_target]) - 1 - 'D - Aon Fees'[D - Aon Fees Value]
+
+port_median_norm_ret_value_target = LN( 1 + [port_mean_log_norm_ret_value_target] ) - 0.5 * [port_norm_vol_value_target]
+
+port_norm_vol_value_target = LN(
+        1 + ( POWER([port_log_norm_vol_value_target], 2) / POWER( 1 + [port_mean_log_norm_ret_value_target], 2 ) )
+    )
+	
+port_sharpe_value_target = ( [port_median_log_norm_ret_value_target] - [cma_risk_free] )  / [port_log_norm_vol_value_target]
+
+port_var_95_1y_value_target = EXP( [port_median_norm_ret_value_target] + NORM.S.INV(0.05) * SQRT( [port_norm_vol_value_target] ) ) - 1 - 'D - Aon Fees'[D - Aon Fees Value]
+
+port_weights_target = 
+
+    VAR asset_id = SELECTEDVALUE('D - CMA Asset Class'[cmaAssetClassId])
+    VAR port_mm_id = SELECTEDVALUE('D - US Portfolio Mix & Match'[portMixMatchId]) 
+    
+    VAR rs_asset_weights_client = [rs_total_client]
+    VAR rs_asset_weights_model = [rs_total_model]
+    VAR rs_asset_weights_rec = [rs_total_rec]
+    VAR rs_target_weights = 
+        IF(port_mm_id = 1 || port_mm_id = 2,  CALCULATE([port_weights_client], 'D - US CMA Risk Profile'[cmaRiskId] = 1),
+            IF(port_mm_id = 3 || port_mm_id = 4, CALCULATE([port_weights_model], 'D - US CMA Risk Profile'[cmaRiskId] = 1),
+                IF(port_mm_id = 5 || port_mm_id = 6, CALCULATE([port_weights_rec], 'D - US CMA Risk Profile'[cmaRiskId] = 1),
+                0
+                )
+            )
+        ) * [rs_normalizer]
+    VAR rr_asset_weights_client = [sum_weights_rrfi_client]
+    VAR rr_asset_weights_model = [rr_total_model]
+    VAR rr_asset_weights_rec = [sum_weights_rrfi_rec]
+    VAR rr_target_weights = 
+        IF(port_mm_id = 3 || port_mm_id = 5, CALCULATE([port_weights_client], 'D - US CMA Risk Profile'[cmaRiskId] = 2),
+            IF(port_mm_id = 1 || port_mm_id = 6, CALCULATE([port_weights_model], 'D - US CMA Risk Profile'[cmaRiskId] = 2),
+                IF(port_mm_id = 2 || port_mm_id = 4, CALCULATE([port_weights_rec], 'D - US CMA Risk Profile'[cmaRiskId] = 2),
+                0
+                )
+            )
+        ) * [rr_normalizer]
+
+    // Please hardcode new cmaAssetClassId
+    VAR cma_assets = SWITCH(
+        asset_id,
+        10211011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10211011),
+        10221011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10221011),
+        10001011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10001011),
+        10071011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10071011),
+        10131011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10131011),
+        11461122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11461122),
+        11471122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11471122),
+        11481122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11481122),
+        11491122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11491122),
+        11501122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11501122),
+        11511122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11511122),
+        11521122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11521122),
+        10501041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10501041),
+        10521041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10521041),
+        11531122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11531122),
+        11541122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11541122),
+        11551122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11551122),
+        11241122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11241122),
+        11251122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11251122),
+        11261122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11261122),
+        11271122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11271122),
+        11831122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11831122),
+        11851122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11851122),
+        10601041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10601041),
+        11801122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11801122),
+        10531041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10531041),
+        10541041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10541041),
+        10551041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10551041),
+        10981101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10981101),
+        11161101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11161101),
+        11841122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11841122),
+        10761071, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10761071),
+        10911081, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10911081),
+        10401011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10401011),
+        10851081, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10851081),
+        10851091, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10851091),
+        10921081, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10921081),
+        10921091, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10921091),
+        10441031, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10441031),
+        10841071, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10841071),
+        12101101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12101101),
+        12121101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12121101),
+        12111101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12111101),
+        12131101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12131101),
+        11021101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11021101),
+        11101101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11101101),
+        11001101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11001101),
+        11071101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11071101),
+        10701061, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10701061),
+        10711061, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10711061),
+        10901081, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10901081),
+        10891081, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10891081),
+        10571041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10571041),
+        10571051, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10571051),
+        10431011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10431011),
+        10591041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10591041),
+        11141101, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11141101),
+        12081011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 12081011),
+        11821122, CALCULATE(rr_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 11821122),
+        10281011, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10281011),
+        10561041, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10561041),
+        10831081, CALCULATE(rs_target_weights, 'F - Model Portfolio - Raw Allocation'[cmaAssetClassId] = 10831081),
+        0
+    )
+
+RETURN
+cma_assets
+
+rr_normalizer = 
+    
+    VAR port_mm_id = SELECTEDVALUE('D - US Portfolio Mix & Match'[portMixMatchId]) 
+    VAR rr_total_client = [sum_weights_rrfi_client]
+    VAR rr_total_model = [rr_total_model]
+    VAR rr_total_rec = [sum_weights_rrfi_rec]
+    VAR rr_total_target = 'D - Weights - Target Risk-Reducing'[D - Weights - Target Risk-Reducing Value]
+    VAR rr_target_ratio = 
+        IF(port_mm_id = 3 || port_mm_id = 5, rr_total_target / rr_total_client,
+            IF(port_mm_id = 1 || port_mm_id = 6, rr_total_target / rr_total_model,
+                IF(port_mm_id = 2 || port_mm_id = 4, rr_total_target / rr_total_rec,
+                0
+                )
+            )
+        )
+
+RETURN
+rr_target_ratio
+
+rr_total_model = CALCULATE(
+    SUM('F - Model Portfolio - Raw Allocation'[Model Portfolio CMA Allocation]),
+    ALLEXCEPT('F - Model Portfolio - Raw Allocation', 'D - Model Portfolio'[modelPortfolioDisplayName]),
+    'D - US CMA Risk Profile'[cmaRiskId] = 2
+) 
+* 100
+
+rs_normalizer = 
+    
+    VAR port_mm_id = SELECTEDVALUE('D - US Portfolio Mix & Match'[portMixMatchId]) 
+    VAR rs_total_target = 'D - Weights - Target Return-Seeking'[D - Weights - Target Return-Seeking Value]
+    VAR rs_target_ratio = 
+        IF(port_mm_id = 1 || port_mm_id = 2, rs_total_target / [rs_total_client],
+            IF(port_mm_id = 3 || port_mm_id = 4, rs_total_target / [rs_total_model],
+                IF(port_mm_id = 5 || port_mm_id = 6, rs_total_target / [rs_total_rec],
+                0
+                )
+            )
+        )
+
+RETURN
+rs_target_ratio 
+
+rs_total_client = [sum_weights_public_eq_client] + [sum_weights_private_eq_client] + [sum_weights_liquid_rsfi_client] + [sum_weights_illiquid_rsfi_client] + [sum_weights_open_end_ra_client] + [sum_weights_closed_end_ra_client] + [sum_weights_liquid_alt_client] 
+
+rs_total_model = CALCULATE(
+    SUM('F - Model Portfolio - Raw Allocation'[Model Portfolio CMA Allocation]),
+    ALLEXCEPT('F - Model Portfolio - Raw Allocation', 'D - Model Portfolio'[modelPortfolioDisplayName]),
+    'D - US CMA Risk Profile'[cmaRiskId] = 1
+) 
+* 100
+
+rs_total_rec = [sum_weights_public_eq_rec] + [sum_weights_private_eq_rec] + [sum_weights_liquid_rsfi_rec] + [sum_weights_illiquid_rsfi_rec] + [sum_weights_open_end_ra_rec] + [sum_weights_closed_end_ra_rec] + [sum_weights_liquid_alt_rec]
+
+// Portfolio Surplus
+port_log_norm_vol_matrix_surplus_client = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_surplus_client], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_surplus_client], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+wt_row * wt_column * [cma_covariance]
+
+port_log_norm_vol_value_surplus_client = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_surplus_client]
+        )
+
+RETURN
+SQRT(vol)
+
+port_ret_value_surplus_client = 
+    
+    VAR mp_id = SELECTEDVALUE('D - Model Portfolio'[modelPortfolioTypeId])
+    VAR surplus_ret = IF(mp_id <> 3, [port_median_log_norm_ret_value_client] - [port_median_log_norm_ret_value_lp], "N.A.")
+
+RETURN
+surplus_ret
+
+port_sharpe_value_surplus_client = [port_ret_value_surplus_client] / [port_log_norm_vol_value_surplus_client]
+
+port_weights_surplus_client = [port_weights_client] - [port_weights_lp]
+
+port_log_norm_vol_matrix_surplus_target = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_surplus_target], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_surplus_target], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+wt_row * wt_column * [cma_covariance]
+
+port_log_norm_vol_value_surplus_target = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_surplus_target]
+        )
+
+RETURN
+SQRT(vol)
+
+port_ret_value_surplus_target = 
+    
+    VAR mp_id = SELECTEDVALUE('D - Model Portfolio'[modelPortfolioTypeId])
+    VAR surplus_ret = IF(mp_id <> 3, [port_median_log_norm_ret_value_target] - [port_median_log_norm_ret_value_lp], "N.A.")
+
+RETURN
+surplus_ret
+
+port_sharpe_value_surplus_target = [port_ret_value_surplus_target] / [port_log_norm_vol_value_surplus_target]
+
+port_weights_surplus_target = [port_weights_target] - [port_weights_lp]
+
+port_log_norm_vol_matrix_surplus_model = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_surplus_model], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_surplus_model], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+wt_row * wt_column * [cma_covariance]
+
+port_log_norm_vol_value_surplus_model = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_surplus_model]
+        )
+
+RETURN
+SQRT(vol)
+
+port_ret_value_surplus_model = 
+    
+    VAR mp_id = SELECTEDVALUE('D - Model Portfolio'[modelPortfolioTypeId])
+    VAR surplus_ret = IF(mp_id <> 3, [port_median_log_norm_ret_value_model] - [port_median_log_norm_ret_value_lp], "N.A.")
+
+RETURN
+surplus_ret
+
+port_sharpe_value_surplus_model = [port_ret_value_surplus_model] / [port_log_norm_vol_value_surplus_model]
+
+port_weights_surplus_model = [port_weights_model] - [port_weights_lp]
+
+port_log_norm_vol_matrix_surplus_rec = 
+
+    VAR R1 = SELECTEDVALUE( 'D - CMA Rows'[cmaAssetClassId] )
+    VAR C1 = SELECTEDVALUE( 'D - CMA Columns'[cmaAssetClassId] )
+    VAR wt_row = CALCULATE( [port_weights_surplus_rec], 'D - CMA Asset Class'[cmaAssetClassId] = R1 )
+    VAR wt_column = CALCULATE( [port_weights_surplus_rec], 'D - CMA Asset Class'[cmaAssetClassId] = C1 )
+
+RETURN
+wt_row * wt_column * [cma_covariance]
+
+port_log_norm_vol_value_surplus_rec = 
+    
+    VAR vol = SUMX(
+            GENERATE( ALL('D - CMA Rows'[cmaAssetClassId]), ALL('D - CMA Columns'[cmaAssetClassId]) ), 
+            [port_log_norm_vol_matrix_surplus_rec]
+        )
+
+RETURN
+SQRT(vol)
+
+port_ret_value_surplus_rec = 
+    
+    VAR mp_id = SELECTEDVALUE('D - Model Portfolio'[modelPortfolioTypeId])
+    VAR surplus_ret = IF(mp_id <> 3, [port_median_log_norm_ret_value_rec] - [port_median_log_norm_ret_value_lp], "N.A.")
+
+RETURN
+surplus_ret
+
+port_sharpe_value_surplus_rec = [port_ret_value_surplus_rec] / [port_log_norm_vol_value_surplus_rec]
+
+port_weights_surplus_rec = [port_weights_rec] - [port_weights_lp]

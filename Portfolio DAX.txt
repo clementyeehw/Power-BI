@@ -1,3 +1,4 @@
+//https://www.financialwisdomforum.org/gummy-stuff/median.htm
 // CMA
 cma_covariance = 
     

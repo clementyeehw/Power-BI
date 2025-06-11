@@ -1,0 +1,875 @@
+{
+	"info": {
+		"_postman_id": "dd734b79-5982-4338-89a8-7dae2372e37c",
+		"name": "RI_SharePoint_API_Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Access Token from SharePoint",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"user-agent": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "resource",
+							"value": "00000003-0000-0ff1-ce00-000000000000/one.aon.net@94cfddbc-0627-494a-ad7a-29aea3aea832",
+							"type": "default"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "default"
+						},
+						{
+							"key": "client_id",
+							"value": "bc69eae1-0723-4884-9c59-4b7b33bb2a88@94cfddbc-0627-494a-ad7a-29aea3aea832",
+							"type": "default"
+						},
+						{
+							"key": "client_secret",
+							"value": "llmzDIsoleTLpavYojqQoPS6YtAfdUFsOEH4nGuDvpA=",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://accounts.accesscontrol.windows.net/94cfddbc-0627-494a-ad7a-29aea3aea832/tokens/OAuth/2",
+					"protocol": "https",
+					"host": [
+						"accounts",
+						"accesscontrol",
+						"windows",
+						"net"
+					],
+					"path": [
+						"94cfddbc-0627-494a-ad7a-29aea3aea832",
+						"tokens",
+						"OAuth",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All List Items",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"user-agent": true,
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "default"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "default"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzU2NjU1OCwibmJmIjoxNjUzNTY2NTU4LCJleHAiOjE2NTM2NTMyNTgsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.AZLqHvKjarxLb492mNIzb8cFN7wmEj_0Juq7Ryp9gUUxUvts2JVfoe_kCjlZhC52wn2Es5eKAGkCXa-S6U0YGN3asLpTEA3xUoWMioE20HqTe2Tg9kZE9OqXoOeWGflIjoj2DKLTcRtpFf68m-FgAqTU9aOj0vg1WiFIk8b-ZoJkCndTrZWNxUijTfAC2HzkxbIWYxsK6TTHoN_7yoeHaoFiluZgl-BRPNWjdGoZacbznNGrP69mhz5Gkzsw89xCCuztL0Z3e1HwbaRKhojHRb15SgdJvuzTzN5LMh95L7xJkjpNLzkQIB07kt-3VfdoX5hPevznvWN97Fx-JHm-yg",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/Lists/getbytitle('Employee%20onboarding')/items",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"Web",
+						"Lists",
+						"getbytitle('Employee%20onboarding')",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Folder Exist",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"user-agent": true,
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "default"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "default"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzU2NjU1OCwibmJmIjoxNjUzNTY2NTU4LCJleHAiOjE2NTM2NTMyNTgsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.AZLqHvKjarxLb492mNIzb8cFN7wmEj_0Juq7Ryp9gUUxUvts2JVfoe_kCjlZhC52wn2Es5eKAGkCXa-S6U0YGN3asLpTEA3xUoWMioE20HqTe2Tg9kZE9OqXoOeWGflIjoj2DKLTcRtpFf68m-FgAqTU9aOj0vg1WiFIk8b-ZoJkCndTrZWNxUijTfAC2HzkxbIWYxsK6TTHoN_7yoeHaoFiluZgl-BRPNWjdGoZacbznNGrP69mhz5Gkzsw89xCCuztL0Z3e1HwbaRKhojHRb15SgdJvuzTzN5LMh95L7xJkjpNLzkQIB07kt-3VfdoX5hPevznvWN97Fx-JHm-yg",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/Lists/getbytitle('Employee%20onboarding')/items",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"Web",
+						"Lists",
+						"getbytitle('Employee%20onboarding')",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Folder",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"user-agent": true,
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json",
+						"type": "default"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "default"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1NDIzMzM0NywibmJmIjoxNjU0MjMzMzQ3LCJleHAiOjE2NTQzMjAwNDcsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.hsFlTWIXca_kpk9pMi_uILOsj-60nJYsB3sJWwQJVr4e5cal35TCDm6FYfTcJSZMtFlDeduwZrKq-tVdKprmgspYOWcHk03TDiapHdAI68FQ0KMN9PFQ0eSWwSduzLAlPwVhXILdGbVpgYCRvUKCElBXXZQT1jjso4394W7eZYrIwFSEwqlnGJsbrU0q5eEE_3PPtUA-iu7xEIKcZQ8gF0tjYQ8aI_BBAyB0lSTIX4YI94HLD-RAPa3cCYtqKFM-pT7QVOLzCI9STXy0AvlreQ0APYjG3BM5vepuS6lthGECkOhD2gumJByb0OF7pTZ8nj48fCaPBLPYBO24sgEW4w",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFolderByServerRelativeUrl('TestDocLib/ODDV-19000')/Folders/add('test')",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"Web",
+						"GetFolderByServerRelativeUrl('TestDocLib",
+						"ODDV-19000')",
+						"Folders",
+						"add('test')"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Single Item to List",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true,
+					"user-agent": true,
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzQ5MDk5MSwibmJmIjoxNjUzNDkwOTkxLCJleHAiOjE2NTM1Nzc2OTEsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.Y1Hgb8jGz0TTFwqdheAHMjms-wfucKkvWqK4-oO4JhaNPvRlc0Dgbjag68mGMbh4EhIgwc-uF_AVoZItuuU-25pBeeYlhL2v1rn2flmrI5GCILRRPWdT0YrP17s0ApP4H8rnrMV38RXxkeYcu_ex3nnTCZStSlkHXTrQUnnmBliV8H1so0D2PjtuZNiNE_RNFHzc_YuBGCOiluNaknPRNvf1QPJP8oTRnIFdZ2IX6nOc84YN6ER_v7BSY5AVxbZ_0AhQPfnZBrJ7bo8Qd0ji44WKePm96ybjIMTBRDljeTWpECRqmYihhmKYQKnVRS17EH6ftdyVF5YhUe2ztR_F-A",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "*",
+						"type": "default"
+					},
+					{
+						"key": "X-HTTP-Method",
+						"value": "Merge",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"__metadata\": {\"type\": \"SP.Data.Employee_x0020_onboardingListItem\"},\r\n    \"Title\": \"Placeholder\"\r\n}"
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/Lists/getbytitle('Employee%20onboarding')/items",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"Web",
+						"Lists",
+						"getbytitle('Employee%20onboarding')",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Attachment to List Item by ID",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true,
+					"user-agent": true,
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzQ5MDk5MSwibmJmIjoxNjUzNDkwOTkxLCJleHAiOjE2NTM1Nzc2OTEsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.Y1Hgb8jGz0TTFwqdheAHMjms-wfucKkvWqK4-oO4JhaNPvRlc0Dgbjag68mGMbh4EhIgwc-uF_AVoZItuuU-25pBeeYlhL2v1rn2flmrI5GCILRRPWdT0YrP17s0ApP4H8rnrMV38RXxkeYcu_ex3nnTCZStSlkHXTrQUnnmBliV8H1so0D2PjtuZNiNE_RNFHzc_YuBGCOiluNaknPRNvf1QPJP8oTRnIFdZ2IX6nOc84YN6ER_v7BSY5AVxbZ_0AhQPfnZBrJ7bo8Qd0ji44WKePm96ybjIMTBRDljeTWpECRqmYihhmKYQKnVRS17EH6ftdyVF5YhUe2ztR_F-A",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "*",
+						"type": "default"
+					},
+					{
+						"key": "X-HTTP-Method",
+						"value": "Merge",
+						"type": "default",
+						"disabled": true
+					},
+					{
+						"key": "Content-Length",
+						"value": "10",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/zcode/misc/sharepoint/image.png"
+					}
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/web/lists/getbytitle('Employee%20onboarding')/items('3')/AttachmentFiles/add(filename='image.png')",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"web",
+						"lists",
+						"getbytitle('Employee%20onboarding')",
+						"items('3')",
+						"AttachmentFiles",
+						"add(filename='image.png')"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Attachment to A Folder",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true,
+					"user-agent": true,
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzQ5MDk5MSwibmJmIjoxNjUzNDkwOTkxLCJleHAiOjE2NTM1Nzc2OTEsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.Y1Hgb8jGz0TTFwqdheAHMjms-wfucKkvWqK4-oO4JhaNPvRlc0Dgbjag68mGMbh4EhIgwc-uF_AVoZItuuU-25pBeeYlhL2v1rn2flmrI5GCILRRPWdT0YrP17s0ApP4H8rnrMV38RXxkeYcu_ex3nnTCZStSlkHXTrQUnnmBliV8H1so0D2PjtuZNiNE_RNFHzc_YuBGCOiluNaknPRNvf1QPJP8oTRnIFdZ2IX6nOc84YN6ER_v7BSY5AVxbZ_0AhQPfnZBrJ7bo8Qd0ji44WKePm96ybjIMTBRDljeTWpECRqmYihhmKYQKnVRS17EH6ftdyVF5YhUe2ztR_F-A",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "*",
+						"type": "default"
+					},
+					{
+						"key": "X-HTTP-Method",
+						"value": "Merge",
+						"type": "default",
+						"disabled": true
+					},
+					{
+						"key": "Content-Length",
+						"value": "10",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/zcode/misc/sharepoint/image.png"
+					}
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/web/lists/getbytitle('Employee%20onboarding')/items('3')/AttachmentFiles/add(filename='image.png')",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"web",
+						"lists",
+						"getbytitle('Employee%20onboarding')",
+						"items('3')",
+						"AttachmentFiles",
+						"add(filename='image.png')"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Add Attachment to Documents",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json;odata=verbose",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json;odata=verbose",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1Mzg5MDgzMCwibmJmIjoxNjUzODkwODMwLCJleHAiOjE2NTM5Nzc1MzAsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.IFEX2U0Zsgq7tTg5FYX8qNpUG0MABf2dtfxrOjQTAwBIn7XF9tbupNbINmt0Xn38PYLZ0qPIkTVho6VqQFC35dZADLUnOdrWJiIUXrUo6rj-hFUeB2ydr-lvM3CSIZw815i4QiXNY9yMetDV5VHE158zhNes_TTVRblC0bFWWd2jTjRuVM_BqVTlVFB3gbQmohyReHRSC03ZF6Xu8T_Vkt-fvKCVXq4vc1oiwoJcHr_dwFnczTudSF4G5Th0IdjVLJqTL_9aofiJy6MN4ihpA25qalfitRult0NkYU_XK3J_br_gLGFYBOYdrVcczETLASKlnnfl87xeuuyeBRHZgA",
+								"type": "text"
+							},
+							{
+								"key": "If-Match",
+								"value": "*",
+								"type": "default"
+							},
+							{
+								"key": "X-HTTP-Method",
+								"value": "Merge",
+								"type": "default",
+								"disabled": true
+							},
+							{
+								"key": "Content-Length",
+								"value": "10",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/C:/Users/a0593293/OneDrive - Aon/Documents/IMG-9661.jpg"
+							}
+						},
+						"url": {
+							"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/web/getfolderbyserverrelativeurl('TestDocLib')/files/add(overwrite=true,url='Hahaha.jpg')",
+							"protocol": "https",
+							"host": [
+								"one",
+								"aon",
+								"net"
+							],
+							"path": [
+								"sites",
+								"RetirementInvestment-ACIASG",
+								"_api",
+								"web",
+								"getfolderbyserverrelativeurl('TestDocLib')",
+								"files",
+								"add(overwrite=true,url='Hahaha.jpg')"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json;odata=verbose;charset=utf-8"
+						},
+						{
+							"key": "Expires",
+							"value": "Sun, 15 May 2022 06:12:40 GMT"
+						},
+						{
+							"key": "Last-Modified",
+							"value": "Mon, 30 May 2022 06:12:40 GMT"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin,Accept-Encoding"
+						},
+						{
+							"key": "P3P",
+							"value": "CP=\"ALL IND DSP COR ADM CONo CUR CUSo IVAo IVDo PSA PSD TAI TELo OUR SAMo CNT COM INT NAV ONL PHY PRE PUR UNI\""
+						},
+						{
+							"key": "X-SharePointHealthScore",
+							"value": "1"
+						},
+						{
+							"key": "X-SP-SERVERSTATE",
+							"value": "ReadOnly=0"
+						},
+						{
+							"key": "DATASERVICEVERSION",
+							"value": "3.0"
+						},
+						{
+							"key": "SPClientServiceRequestDuration",
+							"value": "751"
+						},
+						{
+							"key": "X-AspNet-Version",
+							"value": "4.0.30319"
+						},
+						{
+							"key": "X-DataBoundary",
+							"value": "None"
+						},
+						{
+							"key": "X-1DSCollectorUrl",
+							"value": "https://mobile.events.data.microsoft.com/OneCollector/1.0/"
+						},
+						{
+							"key": "X-AriaCollectorURL",
+							"value": "https://browser.pipe.aria.microsoft.com/Collector/3.0/"
+						},
+						{
+							"key": "SPRequestGuid",
+							"value": "535c42a0-b01e-d000-1db5-dbc1487b74a5"
+						},
+						{
+							"key": "request-id",
+							"value": "535c42a0-b01e-d000-1db5-dbc1487b74a5"
+						},
+						{
+							"key": "MS-CV",
+							"value": "oEJcUx6wANAdtdvBSHt0pQ.0"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						},
+						{
+							"key": "X-FRAME-OPTIONS",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "Content-Security-Policy",
+							"value": "frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com *.teams.microsoft.us local.teams.office.com *.powerapps.com *.yammer.com *.officeapps.live.com *.office.com *.stream.azure-test.net *.microsoftstream.com *.dynamics.com *.microsoft.com;"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "ASP.NET"
+						},
+						{
+							"key": "MicrosoftSharePointTeamServices",
+							"value": "16.0.0.22518"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-MS-InvokeApp",
+							"value": "1; RequireReadOnly"
+						},
+						{
+							"key": "X-Cache",
+							"value": "CONFIG_NOCACHE"
+						},
+						{
+							"key": "X-MSEdge-Ref",
+							"value": "Ref A: 4EB67B7637924646A0968959EA0787E2 Ref B: SG2EDGE1622 Ref C: 2022-05-30T06:12:40Z"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 30 May 2022 06:12:40 GMT"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "private, max-age=0, proxy-revalidate"
+						},
+						{
+							"key": "Connection",
+							"value": "Keep-Alive"
+						},
+						{
+							"key": "Content-Encoding",
+							"value": "gzip"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"d\": {\n        \"__metadata\": {\n            \"id\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')\",\n            \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')\",\n            \"type\": \"SP.File\"\n        },\n        \"Author\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/Author\"\n            }\n        },\n        \"CheckedOutByUser\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/CheckedOutByUser\"\n            }\n        },\n        \"EffectiveInformationRightsManagementSettings\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/EffectiveInformationRightsManagementSettings\"\n            }\n        },\n        \"InformationRightsManagementSettings\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/InformationRightsManagementSettings\"\n            }\n        },\n        \"ListItemAllFields\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/ListItemAllFields\"\n            }\n        },\n        \"LockedByUser\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/LockedByUser\"\n            }\n        },\n        \"ModifiedBy\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/ModifiedBy\"\n            }\n        },\n        \"Properties\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/Properties\"\n            }\n        },\n        \"VersionEvents\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/VersionEvents\"\n            }\n        },\n        \"Versions\": {\n            \"__deferred\": {\n                \"uri\": \"https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/GetFileByServerRelativePath(decodedurl='/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg')/Versions\"\n            }\n        },\n        \"CheckInComment\": \"\",\n        \"CheckOutType\": 2,\n        \"ContentTag\": \"{ACC51B97-9CFC-4788-B7F7-87FDE1D5849D},2,3\",\n        \"CustomizedPageStatus\": 0,\n        \"ETag\": \"\\\"{ACC51B97-9CFC-4788-B7F7-87FDE1D5849D},2\\\"\",\n        \"Exists\": true,\n        \"IrmEnabled\": false,\n        \"Length\": \"708463\",\n        \"Level\": 1,\n        \"LinkingUri\": null,\n        \"LinkingUrl\": \"\",\n        \"MajorVersion\": 2,\n        \"MinorVersion\": 0,\n        \"Name\": \"Hahaha.jpg\",\n        \"ServerRelativeUrl\": \"/sites/RetirementInvestment-ACIASG/TestDocLib/Hahaha.jpg\",\n        \"TimeCreated\": \"2022-05-27T09:59:04Z\",\n        \"TimeLastModified\": \"2022-05-30T06:12:41Z\",\n        \"Title\": null,\n        \"UIVersion\": 1024,\n        \"UIVersionLabel\": \"2.0\",\n        \"UniqueId\": \"acc51b97-9cfc-4788-b7f7-87fde1d5849d\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Delete Specific List Item By ID",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzQ5MDk5MSwibmJmIjoxNjUzNDkwOTkxLCJleHAiOjE2NTM1Nzc2OTEsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.Y1Hgb8jGz0TTFwqdheAHMjms-wfucKkvWqK4-oO4JhaNPvRlc0Dgbjag68mGMbh4EhIgwc-uF_AVoZItuuU-25pBeeYlhL2v1rn2flmrI5GCILRRPWdT0YrP17s0ApP4H8rnrMV38RXxkeYcu_ex3nnTCZStSlkHXTrQUnnmBliV8H1so0D2PjtuZNiNE_RNFHzc_YuBGCOiluNaknPRNvf1QPJP8oTRnIFdZ2IX6nOc84YN6ER_v7BSY5AVxbZ_0AhQPfnZBrJ7bo8Qd0ji44WKePm96ybjIMTBRDljeTWpECRqmYihhmKYQKnVRS17EH6ftdyVF5YhUe2ztR_F-A",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "*",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/Lists/getbytitle('Employee%20onboarding')/items/getbyid('7')",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"Web",
+						"Lists",
+						"getbytitle('Employee%20onboarding')",
+						"items",
+						"getbyid('7')"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Single Record from List",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzU2NjU1OCwibmJmIjoxNjUzNTY2NTU4LCJleHAiOjE2NTM2NTMyNTgsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.AZLqHvKjarxLb492mNIzb8cFN7wmEj_0Juq7Ryp9gUUxUvts2JVfoe_kCjlZhC52wn2Es5eKAGkCXa-S6U0YGN3asLpTEA3xUoWMioE20HqTe2Tg9kZE9OqXoOeWGflIjoj2DKLTcRtpFf68m-FgAqTU9aOj0vg1WiFIk8b-ZoJkCndTrZWNxUijTfAC2HzkxbIWYxsK6TTHoN_7yoeHaoFiluZgl-BRPNWjdGoZacbznNGrP69mhz5Gkzsw89xCCuztL0Z3e1HwbaRKhojHRb15SgdJvuzTzN5LMh95L7xJkjpNLzkQIB07kt-3VfdoX5hPevznvWN97Fx-JHm-yg",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "*",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/Web/Lists/getbytitle('Employee%20onboarding')/items/getbyid('1')",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"Web",
+						"Lists",
+						"getbytitle('Employee%20onboarding')",
+						"items",
+						"getbyid('1')"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Attachment(s) Server Relative URL by List Item ID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"accept": true,
+					"user-agent": true,
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzU3ODA5NywibmJmIjoxNjUzNTc4MDk3LCJleHAiOjE2NTM2NjQ3OTcsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.RyZbTkSVZ6i2cOwmeK5zfjsOYdz8826ROJzTrK3nqKOjibBzL2g56p73WVEn0pgxLI4csk1Ik8c3e8nHSUN1gFWiZCsVvhWggGgxW8_0yGlq3xfTUJkTQYfsT7eNcE89YlVqFcWZ0QvmCa5A2q8h6dbwe0TDRz1QcWZWq3PsyJk4U_wsSZfR89F9--g2pEXYYqnmFeH3vTZQpGYTGfiZWy9MrYN7syIX_gjoNwii9_9dH9b2urIu2dOrNk8VZ8MCkR4NJuguxsr0Mdkm1T1dUIoQCdXOpiMmC-FMh7lfOtgbRLMEgXvdYmAaknZIRn0EzYYp3Vkx4WVaJpEGoVv6bg",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "*",
+						"type": "default"
+					},
+					{
+						"key": "X-HTTP-Method",
+						"value": "Merge",
+						"type": "default",
+						"disabled": true
+					},
+					{
+						"key": "Content-Length",
+						"value": "10",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/zcode/misc/sharepoint/image.png"
+					}
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/web/lists/getbytitle('Employee%20onboarding')/items('3')/AttachmentFiles",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"web",
+						"lists",
+						"getbytitle('Employee%20onboarding')",
+						"items('3')",
+						"AttachmentFiles"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Download File by Server Relative URL",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"accept": true,
+					"user-agent": true,
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "content-type",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json;odata=verbose",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyIsImtpZCI6ImpTMVhvMU9XRGpfNTJ2YndHTmd2UU8yVnpNYyJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvb25lLmFvbi5uZXRAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwiaXNzIjoiMDAwMDAwMDEtMDAwMC0wMDAwLWMwMDAtMDAwMDAwMDAwMDAwQDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsImlhdCI6MTY1MzU3NTY4NSwibmJmIjoxNjUzNTc1Njg1LCJleHAiOjE2NTM2NjIzODUsImlkZW50aXR5cHJvdmlkZXIiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAOTRjZmRkYmMtMDYyNy00OTRhLWFkN2EtMjlhZWEzYWVhODMyIiwibmFtZWlkIjoiYmM2OWVhZTEtMDcyMy00ODg0LTljNTktNGI3YjMzYmIyYTg4QDk0Y2ZkZGJjLTA2MjctNDk0YS1hZDdhLTI5YWVhM2FlYTgzMiIsIm9pZCI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInN1YiI6IjdmMzE5YmI2LTQ4NTUtNDliMS05ZTg0LTEwM2M3YTYzODllZSIsInRydXN0ZWRmb3JkZWxlZ2F0aW9uIjoiZmFsc2UifQ.jR9EJ0eBlLxhNwo5y9cOxT9iVZ8n6-vvXaGfN_KGaTXabL6gMuOjFIzbm3NqDPfQeGD5Vi0jxT9P8qTBDQ3W3XUo-0YteuXLUBCp6727RY01mLtu3yHNtfmh_q9Hh8SMu4-7z296MOg199cQs6LlQseGOU4L8m7sgH3QTB71Con-Nk0L6i3n5iBE2rlqSc8H31SkJINmOWXAwG7piPI3uTWxC5mqOJy_awwxw7vsuRrhq2Npz71JtLSWTVDjPGf6ZtJcVxbRwd14_e4p7srOyHpyTzwPB-VdhU7yGIg5LfIJ8U_iVuCnngEL_2sZYSebv9g8IyVCQLTaxVJjQU0hRg",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "*",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "X-HTTP-Method",
+						"value": "Merge",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Length",
+						"value": "10",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/zcode/misc/sharepoint/image.png"
+					}
+				},
+				"url": {
+					"raw": "https://one.aon.net/sites/RetirementInvestment-ACIASG/_api/web/GetFileByServerRelativeUrl('/sites/RetirementInvestment-ACIASG/Lists/Employee onboarding/Attachments/3/image.png')/$value",
+					"protocol": "https",
+					"host": [
+						"one",
+						"aon",
+						"net"
+					],
+					"path": [
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"_api",
+						"web",
+						"GetFileByServerRelativeUrl('",
+						"sites",
+						"RetirementInvestment-ACIASG",
+						"Lists",
+						"Employee onboarding",
+						"Attachments",
+						"3",
+						"image.png')",
+						"$value"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
